@@ -7,7 +7,11 @@ from feedback import save_feedback
 
 COOLDOWN = 15  # seconds between generations per session
 
-st.set_page_config(page_title="AI Follow-up Drafter", layout="centered")
+st.set_page_config(
+    page_title="AI Follow-up Drafter",
+    layout="centered",
+    menu_items={"Get help": None, "Report a bug": None, "About": None},
+)
 st.title("Write your follow-up in 10 seconds")
 st.caption("Free. No signup. Paste your thread, get a draft.")
 
