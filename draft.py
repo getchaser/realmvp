@@ -9,8 +9,13 @@ SYSTEM = """You write follow-up emails for sales reps. Rules:
 - Sound like a human who actually read the thread, not a template"""
 
 
+THREAD_CHAR_LIMIT = 3000
+
+
 def generate_draft(contact_name: str, company: str, thread: str, goal: str) -> dict:
     client = anthropic.Anthropic()
+
+    thread = thread[:THREAD_CHAR_LIMIT]
 
     prompt = f"""Email thread with {contact_name}{f' from {company}' if company else ''}:
 

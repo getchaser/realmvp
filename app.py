@@ -1,6 +1,11 @@
+import time
+
 import streamlit as st
+from counter import check_and_increment
 from draft import generate_draft
 from feedback import save_feedback
+
+COOLDOWN = 15  # seconds between generations per session
 
 st.set_page_config(page_title="AI Follow-up Drafter", layout="centered")
 st.title("Write your follow-up in 10 seconds")
@@ -20,7 +25,18 @@ goal = st.radio(
 if goal == "Other":
     goal = st.text_input("Describe your goal")
 
+if "last_gen" not in st.session_state:
+    st.session_state.last_gen = 0
+
 if st.button("Generate follow-up", type="primary", disabled=not (contact and thread)):
+    elapsed = time.time() - st.session_state.last_gen
+    if elapsed < COOLDOWN:
+        st.warning(f"Please wait {int(COOLDOWN - elapsed)}s before generating again.")
+        st.stop()
+    if not check_and_increment():
+        st.error("Daily limit reached. Try again tomorrow.")
+        st.stop()
+    st.session_state.last_gen = time.time()
     with st.spinner("Drafting..."):
         result = generate_draft(contact, company, thread, goal)
 
