@@ -35,6 +35,10 @@ if goal == "Other":
 
 if "last_gen" not in st.session_state:
     st.session_state.last_gen = 0
+if "result" not in st.session_state:
+    st.session_state.result = None
+if "feedback_sent" not in st.session_state:
+    st.session_state.feedback_sent = False
 
 if st.button("Generate follow-up", type="primary", disabled=not (contact and thread)):
     elapsed = time.time() - st.session_state.last_gen
@@ -45,23 +49,31 @@ if st.button("Generate follow-up", type="primary", disabled=not (contact and thr
         st.error("Daily limit reached. Try again tomorrow.")
         st.stop()
     st.session_state.last_gen = time.time()
+    st.session_state.result = None
+    st.session_state.feedback_sent = False
     with st.spinner("Drafting..."):
-        result = generate_draft(contact, company, thread, goal)
+        st.session_state.result = generate_draft(contact, company, thread, goal)
 
+if st.session_state.result:
+    result = st.session_state.result
     st.divider()
     st.text_input("Subject", value=result["subject"])
     st.text_area("Body", value=result["body"], height=180)
     st.code(result["body"], language=None)
 
-    st.divider()
-    useful = st.radio(
-        "Was this useful?",
-        ["👍 Yes, I'd send it", "✏️ Needed editing", "👎 Off the mark"],
-        horizontal=True,
-    )
-    pay = st.text_input("Would you pay for this built into your Gmail? ($X/mo or 'no')")
-    email_addr = st.text_input("Leave your email to hear when we launch (optional)")
+    if not st.session_state.feedback_sent:
+        st.divider()
+        useful = st.radio(
+            "Was this useful?",
+            ["👍 Yes, I'd send it", "✏️ Needed editing", "👎 Off the mark"],
+            horizontal=True,
+        )
+        pay = st.text_input("Would you pay for this built into your Gmail? ($X/mo or 'no')")
+        email_addr = st.text_input("Leave your email to hear when we launch (optional)")
 
-    if st.button("Submit feedback"):
-        save_feedback({"contact": contact, "useful": useful, "pay": pay, "email": email_addr})
+        if st.button("Submit feedback"):
+            save_feedback({"contact": contact, "useful": useful, "pay": pay, "email": email_addr})
+            st.session_state.feedback_sent = True
+            st.rerun()
+    else:
         st.success("Thanks!")
