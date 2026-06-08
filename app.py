@@ -12,6 +12,10 @@ st.set_page_config(
     layout="centered",
     menu_items={"Get help": None, "Report a bug": None, "About": None},
 )
+st.markdown(
+    "<style>header {visibility: hidden;} footer {visibility: hidden;}</style>",
+    unsafe_allow_html=True,
+)
 st.title("Write your follow-up in 10 seconds")
 st.caption("Free. No signup. Paste your thread, get a draft.")
 
